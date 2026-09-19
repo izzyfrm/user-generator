@@ -23,7 +23,7 @@ generates short 3-4 character usernames and checks whether they look available o
 clone the repo:
 
 ```bash
-git clone https://github.com/izzydizzyy/user-generator.git
+git clone https://github.com/izzyfrm/user-generator.git
 cd user-generator
 ```
 
