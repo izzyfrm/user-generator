@@ -80,3 +80,13 @@ availability checks are not guaranteed to be 100% accurate. TikTok can rate-limi
 ## license
 
 use it, change it, mess with it. just don't be weird with it lol.
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=izzyfrm%2Fuser-generator&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=izzyfrm/user-generator&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=izzyfrm/user-generator&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=izzyfrm/user-generator&type=date&legend=top-left" />
+ </picture>
+</a>
