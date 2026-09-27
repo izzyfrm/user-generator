@@ -1,12 +1,13 @@
+# Updated app.py with X support
 import random
 import re
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# user-generator
-# tiny tiktok username checker
-
+# ──────────────────────────────────────────────────────────────────────────────
+#  CONFIGURATION
+# ──────────────────────────────────────────────────────────────────────────────
 GREEN = "\033[92m"
 RED = "\033[91m"
 GRAY = "\033[90m"
@@ -27,6 +28,9 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.9",
 }
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  USERNAME GENERATION
+# ──────────────────────────────────────────────────────────────────────────────
 
 def rare_username():
     length = random.choice((3, 3, 4, 4, 4))
@@ -67,14 +71,15 @@ def rare_username():
 
 def generate_usernames(amount):
     names = set()
-
     while len(names) < amount:
         names.add(rare_username())
-
     return list(names)
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  CHECK AVAILABILITY
+# ──────────────────────────────────────────────────────────────────────────────
 
-def is_available(username):
+def is_tiktok_available(username):
     url = f"https://www.tiktok.com/@{username}"
     req = urllib.request.Request(url, headers=HEADERS)
 
@@ -86,7 +91,6 @@ def is_available(username):
             rf'"uniqueId":"{re.escape(username)}"',
             rf'\\"uniqueId\\":\\"{re.escape(username)}\\"',
         )
-
         return not any(re.search(pattern, html, re.IGNORECASE) for pattern in patterns)
 
     except urllib.error.HTTPError as error:
@@ -97,36 +101,65 @@ def is_available(username):
         return None
 
 
+def is_x_available(username):
+    url = f"https://twitter.com/{username}"
+    req = urllib.request.Request(url, headers=HEADERS)
+
+    try:
+        with urllib.request.urlopen(req, timeout=4) as response:
+            html = response.read().decode("utf-8", errors="ignore")
+
+        return not bool(re.search(rf'<meta name="description" content=".*{re.escape(username)}.*">', html, re.IGNORECASE))
+
+    except urllib.error.HTTPError as error:
+        if error.code == 404:
+            return True
+        return None
+    except (urllib.error.URLError, TimeoutError):
+        return None
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  USER INPUT
+# ──────────────────────────────────────────────────────────────────────────────
+
 def ask_amount():
     while True:
         try:
             amount = int(input("[?] how many do u want generated... "))
-
             if 1 <= amount <= 5000:
                 return amount
-
             print(f"{GRAY}[!] max is 5000{RESET}")
-
         except ValueError:
             print(f"{GRAY}[!] enter a number{RESET}")
 
+
+def ask_platform():
+    while True:
+        choice = input("[?] check TikTok (t) or X (x)? ").strip().lower()
+        if choice in ("t", "x"):
+            return choice
+        print(f"{GRAY}[!] choose 't' or 'x'{RESET}")
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  MAIN
+# ──────────────────────────────────────────────────────────────────────────────
 
 def main():
     print("user-generator")
     print(f"{GRAY}tiktok / 3-4 char usernames{RESET}\n")
 
+    platform = ask_platform()
     amount = ask_amount()
     usernames = generate_usernames(amount)
     available = 0
 
     print()
 
+    checker = is_tiktok_available if platform == "t" else is_x_available
+
     try:
         with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-            jobs = {
-                pool.submit(is_available, username): username
-                for username in usernames
-            }
+            jobs = {pool.submit(checker, username): username for username in usernames}
 
             for job in as_completed(jobs):
                 username = jobs[job]
